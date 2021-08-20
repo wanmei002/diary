@@ -30,7 +30,31 @@ redis-cli config set save " "
     重量级操作，如果不采用压缩算法，那么内存中的数据被克隆一份(相当于在数据保存到 RDB 文件里的时候，内容里有两份一样的数据),
     大致 2 倍的膨胀性需要考虑, 频繁执行成本过高( 影响性能)
     2. RDB 文件使用特定二进制格式保存, redis 版本演进过程中有多个格式的 RDB 版本, 存在不兼容问题
- 
+    3. 在一定间隔时间做一次备份, 所以如果redis意外 down 掉的话, 就会丢失最后一次快照后的所有修改(数据有丢失)
+    
+### RDB 自动保存的原理
+redis 有个结构
+```c
+struct redisService{
+    // 1. 记录保存 save 条件的数组
+    struct saveparam *saveparams;
+    // 2. 修改计数器, redis 每次修改dirty+1，如果执行了 bgsave, dirty=0
+    long long dirty;
+    // 3. 上一次执行保存的时间, 用于计算距离当前时间 
+    time_t lastsave;
+}
+```
+saveparam 结构
+```c
+struct saveparam{
+    // 秒数
+    time_t seconds;
+    // 修改数
+    int changes;
+}
+```
+ redis 每 100 毫秒会执行一次 severCron 函数, 这个函数会遍历 saveparams 数组中保存的所有条件，只要有
+ 一个条件被满足, 那么就会执行 bgsave 命令. 执行完后 dirty 计数器更新为0, lastsave 也更新为执行命令的完成时间
  
 
 
