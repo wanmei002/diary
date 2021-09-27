@@ -134,5 +134,28 @@ db.Where("name1=@name OR name2=@name", map[string]interface{}{"name": "zzh"}).Fi
 // SELECT * FROM `users` WHERE name1="zzh" OR name2="zzh" LIMIT 1
 
 db.Row("SELECT * FROM `users` WHERE name1=@name OR name2=@name", map[string]interface{}{"name": "zzh"}).Find(&user)// &user 可以用 map 替换，但是 map 必须 make 分配内存
+
+db.Exec("UPDATE users SET name1=@name, name2=@name2",
+    map[string]interface{}{"name": "zzh1", "name2": "zzh2"}
+)
+// UPDATE users SET name="zzh1", name2="zzh2"
+```
+
+### 分组条件
+```go
+db.Where(
+    db.Where("pizza = ?", "pepperoni").Where(db.Where("size=?", "small").Or("size=?", "medium")),
+).Or(
+    db.Where("pizza = ?", "hawaiian").Where("size=?", "xlarge"),
+).Find(&pizzas)
+```
+
+### 支持多个字段追踪 create/update 时间(time、unix(毫/纳)秒)
+```go
+type User struct {
+    CreateedAt time.Time    // 在创建时, 如果该字段值为零值，则使用当前时间填充
+    UpdatedAt   int         // 在创建时该字段为零值或者在更新时, 使用当前时间戳的秒数填充
+    Updated     int64
+}
 ```
 

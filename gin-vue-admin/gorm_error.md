@@ -6,3 +6,6 @@ dsn := fmt.Sprintf(
     c.User, c.Pwd, c.Host+":"+ strconv.Itoa(c.Port), c.DB,
 )
 ```
+
+### assignment to entry in nil map
+map 只是声明了，还需要make 分配内存才行
