@@ -155,7 +155,9 @@ db.Where(
 type User struct {
     CreateedAt time.Time    // 在创建时, 如果该字段值为零值，则使用当前时间填充
     UpdatedAt   int         // 在创建时该字段为零值或者在更新时, 使用当前时间戳的秒数填充
-    Updated     int64
+    Updated     int64 `gorm:"autoUpdateTime:nano"`       // 使用时间戳的秒数填充更新时间
+    Updated2    int64 `gorm:"autoUpdateTime:milli"`     // 使用时间戳的毫秒数填充更新时间
+    Created     int64   `` 
 }
 ```
 
